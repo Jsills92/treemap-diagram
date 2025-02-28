@@ -6,7 +6,7 @@ html, body {
   justify-content: center; /* Horizontally centers the content */
   align-items: center; /* Vertically centers the content */
   flex-direction: column;
-  background-color: bisque;
+
 }
 
 #title, #description {
