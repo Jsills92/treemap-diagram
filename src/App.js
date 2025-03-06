@@ -343,10 +343,19 @@ const Treemap = () => {
   }
   
 
+  const descriptions = {
+    "video-games": "Top 100 Most Sold Video Games Grouped by Platform",
+    "movies": "Top 100 Highest Grossing Movies Grouped By Genre",
+    "kickstarter": "Top 100 Most Funded Kickstarter Projects Grouped by Category"
+  };
+
   return (
     <div>
       <h1 id="title">TOP 100</h1>
-      <p id="description">Visualization of {dataset.replace("-", " ")} data.</p>
+      {/* Dynamic description based on selected dataset */}
+    <p id="description">
+      {descriptions[dataset]}
+    </p>
 
       {/* Navigation for switching datasets */}
       <nav>
