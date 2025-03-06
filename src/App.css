@@ -36,3 +36,26 @@ text {
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
+
+#legend {
+  position: absolute;
+  top: 20px; /* Adjust vertical position */
+  left: 20px; /* Adjust left position */
+  width: 200px; /* Set a fixed width for the legend */
+  height: auto;
+  padding: 10px;
+  overflow-y: auto; /* Allow scrolling if the legend becomes too long */
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Style for the legend color boxes and labels */
+#legend rect {
+  margin-right: 10px;
+}
+
+#legend text {
+  font-size: 12px;
+  margin-left: 5px;
+}
