@@ -19,7 +19,7 @@ const Treemap = () => {
   };
 
   // Fetch all datasets once
- 
+
   useEffect(() => {
     Promise.all([
       fetch(dataUrls["kickstarter"]).then((res) => res.json()),
@@ -34,30 +34,33 @@ const Treemap = () => {
         });
       })
       .catch((err) => console.error("Error fetching data:", err));
-       // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Create treemap when data changes
-  
+
   useEffect(() => {
-    if (!data) return;
+    if (!data || !data[dataset]) return; // Ensure we have the right data
 
-    console.log(data[dataset]); // Log the dataset you're working with
+    console.log(data[dataset]); // Log the current dataset to verify
 
-    // Clear previous treemap
+    // Clear previous treemap before creating a new one
     d3.select(svgRef.current).selectAll("*").remove();
+    d3.select("#tree-map").selectAll("*").remove();
 
-    // Create root hierarchy
+    // Create root hierarchy for new dataset
     const root = d3
-      .hierarchy(data[dataset]) // Use selected dataset
+      .hierarchy(data[dataset]) // Use the selected dataset
       .eachBefore(
         (d) =>
           (d.data.id = (d.parent ? d.parent.data.id + "." : "") + d.data.name)
       )
-      .sum((d) => d.value)
+      .sum((d) => +d.value)
       .sort((a, b) => b.value - a.value);
 
-      console.log(root);  // Log the entire hierarchical data structure
+    console.log(root); // Log the entire hierarchical structure of the new dataset
+    console.log("Current dataset key:", dataset);
+    console.log("Data retrieved:", data[dataset]);
 
     // Define treemap layout
     const treemapLayout = d3
@@ -73,7 +76,7 @@ const Treemap = () => {
       .attr("width", width)
       .attr("height", height);
 
-    // Append tiles (rect elements)
+    // Append tiles for the new dataset
     const tiles = svg
       .selectAll("g")
       .data(root.leaves())
@@ -81,53 +84,86 @@ const Treemap = () => {
       .append("g")
       .attr("transform", (d) => `translate(${d.x0},${d.y0})`);
 
-      const platformColors = {
-        2600: "#3366CC", // Lighter blue for 2600
-        Wii: "#54A354", // Lighter green for Wii
-        DS: "#FF4D61", // Lighter red for DS
-        X360: "#808080", // Lighter gray for X360
-        GB: "#00B3B3", // Lighter teal for GB
-        PS3: "#9B3B9B", // Lighter purple for PS3
-        NES: "#FFDB73", // Lighter gold for NES
-        PS2: "#66FF66", // Lighter bright green for PS2
-        SNES: "#FF8C4D", // Lighter orange for SNES
-        GBA: "#FF7F80", // Lighter tomato red for GBA
-        PS4: "#9A66B3", // Lighter purple for PS4
-        "3DS": "#FF66B3", // Lighter deep pink for 3DS
-        N64: "#4C914C", // Lighter dark green for N64
-        PS: "#3333CC", // Lighter navy blue for PS
-        XB: "#C47A47", // Lighter brown for XB
-        PC: "#B3B3B3", // Lighter silver for PC
-        PSP: "#3366FF", // Lighter blue for PSP
-        XOne: "#E57373", // Lighter firebrick red for XOne
-        Other: "#F2F2F2", // Lighter gray for Other
-      };
-      
+    const platformColors = {
+      2600: "#3366CC",
+      Wii: "#54A354",
+      DS: "#FF4D61",
+      X360: "#808080",
+      GB: "#00B3B3",
+      PS3: "#9B3B9B",
+      NES: "#FFDB73",
+      PS2: "#66FF66",
+      SNES: "#FF8C4D",
+      GBA: "#FF7F80",
+      PS4: "#9A66B3",
+      "3DS": "#FF66B3",
+      N64: "#4C914C",
+      PS: "#3333CC",
+      XB: "#C47A47",
+      PC: "#B3B3B3",
+      PSP: "#3366FF",
+      XOne: "#E57373",
+      Other: "#F2F2F2",
+      // Movie categories
+      Comedy: "#3366CC",
+      Action: "#54A354",
+      Drama: "#FF4D61",
+      Adventure: "#808080",
+      Family: "#00B3B3",
+      Animation: "#9B3B9B",
+      Biography: "#FFDB73",
+      // Kickstarter categories
+      "Product Design": "#3366CC",
+      "Tabletop Games": "#54A354",
+      "Gaming Hardware": "#FF4D61",
+      "Video Games": "#808080",
+      Sound: "#00B3B3",
+      Television: "#9B3B9B",
+      Narrative_film: "#FFDB73",
+      Web: "#66FF66",
+      Hardware: "#FF8C4D",
+      Games: "#FF7F80",
+      "3D Printing": "#9A66B3",
+      Technology: "#FF66B3",
+      Wearables: "#4C914C",
+      Sculpture: "#3333CC",
+      Apparel: "#C47A47",
+      Food: "#B3B3B3",
+      Art: "#3366FF",
+      Gadgets: "#E57373",
+      Drinks: "#c8c804",
+      "Narrative Film": "#606002",
+    };
 
     tiles
       .append("rect")
       .attr("class", "tile")
       .attr("width", (d) => d.x1 - d.x0)
       .attr("height", (d) => d.y1 - d.y0)
-      .attr("fill", (d) => {
-        const categoryName = d.data.category; // Access platform name (change if necessary)
-        // Map the platform name to a color, defaulting to "Other" if not found
-        const platformColor =
-          platformColors[categoryName] || platformColors["Other"];
-        return platformColor;
-      })
+      .attr(
+        "fill",
+        (d) => platformColors[d.data.category] || platformColors["Other"]
+      )
       .attr("data-name", (d) => d.data.name)
       .attr("data-category", (d) => d.data.category)
       .attr("data-value", (d) => d.data.value);
 
-    tiles
-      .append("text")
-      .attr("x", 5)
-      .attr("y", 15)
-      .text((d) => d.data.name)
-      .attr("font-size", "10px")
-      .attr("fill", "white");
-  }, [data, dataset]);
+      tiles
+      .append("foreignObject")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", (d) => d.x1 - d.x0)
+      .attr("height", (d) => d.y1 - d.y0)
+      .attr("style", "font-size: 10px; color: white; word-wrap: break-word; white-space: normal; padding: 1px;")
+      .append("xhtml:div")
+      .style("width", "100%")
+      .style("height", "100%")
+      .style("overflow", "hidden")
+      .style("text-align", "center")
+      .style("white-space", "normal")  // Allows text wrapping
+      .style("word-wrap", "break-word") // Breaks long words if necessary
+      .html((d) => `<div>${d.data.name}</div>`);  // Insert text content here
+  }, [data, dataset]); // Dependency array ensures re-run when data or dataset changes
 
   return (
     <div>
@@ -137,7 +173,14 @@ const Treemap = () => {
       {/* Navigation for switching datasets */}
       <nav>
         {Object.keys(dataUrls).map((key) => (
-          <button key={key} onClick={() => setDataset(key)}>
+          <button
+            key={key}
+            onClick={() => {
+              console.log("Switching to dataset:", key);
+              setDataset(key);
+              console.log("Data object after loading:", data);
+            }}
+          >
             {key.replace("-", " ")}
           </button>
         ))}

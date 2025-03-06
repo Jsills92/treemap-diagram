@@ -6,7 +6,7 @@ html, body {
   justify-content: center; /* Horizontally centers the content */
   align-items: center; /* Vertically centers the content */
   flex-direction: column;
-
+  background-color: bisque;
 }
 
 #title, #description {
@@ -29,4 +29,10 @@ svg {
   max-width: 100%;
   height: auto;
   margin: 0 auto;
+}
+
+text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
