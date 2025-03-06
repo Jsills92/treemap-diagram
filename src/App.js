@@ -84,6 +84,27 @@ const Treemap = () => {
       .append("g")
       .attr("transform", (d) => `translate(${d.x0},${d.y0})`);
 
+      d3.select("#tooltip").remove();
+
+    // Tooltip creation
+    const tooltip = d3
+      .select("body")
+      .append("div")
+      .attr("id", "tooltip")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background-color", "#222831")
+      .style("border-radius", "5px")
+      .style("padding", "5px 10px")
+      .style("font-size", "10px")
+      .style("color", "#EEEEEE")
+      .style("z-index", "10")
+      .style("max-width", "200px") // Limiting the width of the tooltip
+      .style("max-height", "150px") // Limit height if the content becomes long
+      .style("overflow", "auto"); // Allow scrolling if content overflows
+
+
+
     const platformColors = {
       2600: "#3366CC",
       Wii: "#54A354",
@@ -136,38 +157,76 @@ const Treemap = () => {
     };
 
     tiles
-      .append("rect")
-      .attr("class", "tile")
-      .attr("width", (d) => d.x1 - d.x0)
-      .attr("height", (d) => d.y1 - d.y0)
-      .attr(
-        "fill",
-        (d) => platformColors[d.data.category] || platformColors["Other"]
-      )
-      .attr("data-name", (d) => d.data.name)
-      .attr("data-category", (d) => d.data.category)
-      .attr("data-value", (d) => d.data.value);
-
-      tiles
-      .append("foreignObject")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("width", (d) => d.x1 - d.x0)
-      .attr("height", (d) => d.y1 - d.y0)
-      .attr("style", "font-size: 10px; color: white; word-wrap: break-word; white-space: normal; padding: 1px;")
-      .append("xhtml:div")
-      .style("width", "100%")
-      .style("height", "100%")
-      .style("overflow", "hidden")
-      .style("text-align", "center")
-      .style("white-space", "normal")  // Allows text wrapping
-      .style("word-wrap", "break-word") // Breaks long words if necessary
-      .html((d) => `<div>${d.data.name}</div>`);  // Insert text content here
+    .append("rect")
+    .attr("class", "tile")
+    .attr("width", (d) => d.x1 - d.x0)
+    .attr("height", (d) => d.y1 - d.y0)
+    .attr("fill", (d) => platformColors[d.data.category] || platformColors["Other"])
+    .attr("data-name", (d) => d.data.name)
+    .attr("data-category", (d) => d.data.category)
+    .attr("data-value", (d) => d.data.value)
+    .on("mouseover", function(event, d) {
+      tooltip
+        .style("visibility", "visible")
+        .attr("data-name", d.data.name)
+        .attr("data-category", d.data.category)
+        .attr("data-value", d.data.value)
+        .html(`
+          <strong>Name:</strong> ${d.data.name}<br>
+          <strong>Category:</strong> ${d.data.category}<br>
+          <strong>Value:</strong> ${d.data.value}
+        `);
+  
+      // Position the tooltip near the mouse cursor
+      tooltip
+        .style("top", event.pageY + 10 + "px")
+        .style("left", event.pageX + 10 + "px");
+    })
+    .on("mouseout", function() {
+      tooltip.style("visibility", "hidden");
+    });
+  
+  tiles
+    .append("foreignObject")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", (d) => d.x1 - d.x0)
+    .attr("height", (d) => d.y1 - d.y0)
+    .attr("style", "font-size: 10px; color: white; word-wrap: break-word; white-space: normal; padding: 1px;")
+    .append("xhtml:div")
+    .style("width", "100%")
+    .style("height", "100%")
+    .style("overflow", "hidden")
+    .style("text-align", "center")
+    .style("white-space", "normal")  // Allows text wrapping
+    .style("word-wrap", "break-word") // Breaks long words if necessary
+    .html((d) => `<div>${d.data.name}</div>`)  // Insert text content here
+    .on("mouseover", function(event, d) {
+      tooltip
+        .style("visibility", "visible")
+        .attr("data-name", d.data.name)
+        .attr("data-category", d.data.category)
+        .attr("data-value", d.data.value)
+        .html(`
+          <strong>Name:</strong> ${d.data.name}<br>
+          <strong>Category:</strong> ${d.data.category}<br>
+          <strong>Value:</strong> ${d.data.value}
+        `);
+  
+      // Position the tooltip near the mouse cursor
+      tooltip
+        .style("top", event.pageY + 10 + "px")
+        .style("left", event.pageX + 10 + "px");
+    })
+    .on("mouseout", function() {
+      tooltip.style("visibility", "hidden");
+    });
+  
   }, [data, dataset]); // Dependency array ensures re-run when data or dataset changes
 
   return (
     <div>
-      <h1 id="title">Treemap Diagram</h1>
+      <h1 id="title">TOP 100</h1>
       <p id="description">Visualization of {dataset.replace("-", " ")} data.</p>
 
       {/* Navigation for switching datasets */}
@@ -176,9 +235,9 @@ const Treemap = () => {
           <button
             key={key}
             onClick={() => {
-              console.log("Switching to dataset:", key);
+              
               setDataset(key);
-              console.log("Data object after loading:", data);
+              
             }}
           >
             {key.replace("-", " ")}
